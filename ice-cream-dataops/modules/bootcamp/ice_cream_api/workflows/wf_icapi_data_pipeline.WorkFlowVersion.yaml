@@ -1,0 +1,58 @@
+workflowExternalId: wf_icapi_data_pipeline
+version: '1'
+workflowDefinition:
+  description: Run create_asset_hierarchy transformation, followed by contextualize_ts_assets transformation, followed by icapi_datapoints_extractor function, and finally, oee_timeseries function
+  tasks:
+    - externalId: create_asset_hierarchy_transformation_task
+      type: transformation
+      parameters:
+        transformation:
+          externalId: create_asset_hierarchy
+          concurrencyPolicy: fail
+        isAsyncComplete: false
+      name: Create Asset Hierarchy Transformation
+      description: First Task - Create Asset Hierarchy Transformation
+      retries: 3
+      timeout: 3600
+      onFailure: abortWorkflow
+
+    - externalId: contextualize_ts_assets_transformation_task
+      type: transformation
+      parameters:
+        transformation:
+          externalId: contextualize_ts_assets
+          concurrencyPolicy: fail
+        isAsyncComplete: false
+      name: Contextualize TS Assets Transformation
+      description: Second Task - Contextualize Asset Hierarchy Transformation
+      retries: 3
+      timeout: 3600
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: create_asset_hierarchy_transformation_task
+
+    - externalId: icapi_datapoints_extractor_task
+      type: function
+      parameters:
+        function:
+          externalId: icapi_datapoints_extractor
+      name: ICAPI Datapoints Extractor Function
+      description: Third Task - ICAPI Datapoints Extractor Function
+      retries: 3
+      timeout: 3600
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: contextualize_ts_assets_transformation_task
+
+    - externalId: oee_timeseries_task
+      type: function
+      parameters:
+        function:
+          externalId: oee_timeseries
+      name: OEE Timeseries Function
+      description: Fourth Task - OEE Timeseries Function
+      retries: 3
+      timeout: 3600
+      onFailure: abortWorkflow
+      dependsOn:
+        - externalId: icapi_datapoints_extractor_task

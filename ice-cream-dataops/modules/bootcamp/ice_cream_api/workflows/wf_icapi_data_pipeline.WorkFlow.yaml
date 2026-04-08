@@ -1,0 +1,2 @@
+externalId: wf_icapi_data_pipeline
+description: Coordinate order and execution of transformation, create_asset_hierarchy, transformation, contextualize_ts_assets, function, icapi_datapoints_extractor, and function, oee_timeseries.
